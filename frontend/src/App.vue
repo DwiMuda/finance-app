@@ -1,5 +1,8 @@
 <template>
-  <div class="app-layout">
+  <div v-if="isLoginPage" class="login-page">
+    <RouterView />
+  </div>
+  <div v-else class="app-layout">
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">₿</div>
@@ -34,18 +37,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import api from './services/api.js'
 
+const route = useRoute()
+const isLoginPage = computed(() => route.name === 'Login')
 const isConnected = ref(false)
+
 onMounted(async () => {
-  try { await api.get('/transactions?limit=1'); isConnected.value = true }
+  if (isLoginPage.value) return
+  try { 
+    await api.get('/health')  // pakai endpoint /health yang tidak butuh auth
+    isConnected.value = true 
+  }
   catch { isConnected.value = false }
 })
 </script>
 
 <style scoped>
+.login-page { height:100vh; background:var(--bg); }
 .app-layout { display:flex; height:100vh; overflow:hidden; }
 .sidebar { width:var(--sidebar-w); min-width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:24px 16px; gap:32px; }
 .sidebar-brand { display:flex; align-items:center; gap:12px; padding:0 8px; }
