@@ -18,6 +18,15 @@ app.use(cors({
   credentials: true
 }));
 
+const authRoutes = require('./routes/authRoutes');
+const authMiddleware = require('./middleware/auth');
+
+// Tambah route login (tanpa auth)
+app.use('/api/auth', authRoutes);
+
+// Proteksi route transactions
+app.use('/api/transactions', authMiddleware, transactionRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

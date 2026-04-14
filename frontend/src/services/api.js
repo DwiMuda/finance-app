@@ -7,6 +7,25 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
+// ── Tambahkan token di setiap request ──
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+// ── Auto logout jika token expired ──
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
 // ── Ubah format month "2025-01" → { bulan: 1, tahun: 2025 } ──
 const parseMonth = (month) => {
   if (!month) return {}
@@ -23,12 +42,9 @@ export const createTransaction = (data) => api.post('/transactions', data)
 export const updateTransaction  = (id, data) => api.put(`/transactions/${id}`, data)
 export const deleteTransaction  = (id) => api.delete(`/transactions/${id}`)
 
-// Summary — sesuaikan dengan format backend
 export const getSummary = async (params = {}) => {
   const { month } = params
   const res = await api.get('/transactions/summary', { params: parseMonth(month) })
-
-  // Normalisasi response backend → format yang dipakai frontend
   const d = res.data.data || res.data
   return {
     data: {
