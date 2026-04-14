@@ -19,10 +19,8 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-const router = useRouter()
 const form = ref({ username: '', password: '' })
 const error = ref('')
 const loading = ref(false)
@@ -33,7 +31,7 @@ const handleLogin = async () => {
   try {
     const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, form.value)
     localStorage.setItem('token', res.data.token)
-    router.push('/dashboard')
+    window.location.href = '/dashboard'
   } catch (e) {
     error.value = e.response?.data?.message || 'Login gagal'
   } finally {

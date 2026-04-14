@@ -39,7 +39,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import api from './services/api.js'
+import axios from 'axios'
 
 const route = useRoute()
 const isLoginPage = computed(() => route.name === 'Login')
@@ -47,9 +47,10 @@ const isConnected = ref(false)
 
 onMounted(async () => {
   if (isLoginPage.value) return
-  try { 
-    await api.get('/health')  // pakai endpoint /health yang tidak butuh auth
-    isConnected.value = true 
+  try {
+    const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+    await axios.get(BASE.replace('/api', '/health'))
+    isConnected.value = true
   }
   catch { isConnected.value = false }
 })
