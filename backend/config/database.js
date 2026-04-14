@@ -2,18 +2,21 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Pool connection - lebih efisien dari single connection
-const pool = new Pool({
-  host:     process.env.DB_HOST,
-  port:     process.env.DB_PORT,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  // Untuk production (Neon/Supabase), tambahkan SSL:
-  // ssl: { rejectUnauthorized: false }
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+      }
+    : {
+        host:     process.env.DB_HOST,
+        port:     process.env.DB_PORT,
+        user:     process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+      }
+);
 
-// Test koneksi saat server pertama kali jalan
 pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ Gagal konek ke PostgreSQL:', err.message);
