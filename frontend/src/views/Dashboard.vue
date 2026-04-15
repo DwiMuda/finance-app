@@ -10,6 +10,14 @@
         <select class="select" style="width:auto" v-model="selectedMonth" @change="loadData">
           <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
         </select>
+        <button class="logout-btn" @click="logout">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </button>
       </div>
     </div>
 
@@ -83,8 +91,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { getTransactions, getSummary } from '../services/api.js'
+
+const router = useRouter()
 
 const loading = ref(true)
 const recentTransactions = ref([])
@@ -133,6 +143,12 @@ const loadData = async () => {
   }
 }
 
+const logout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('nama')
+  router.push('/login')
+}
+
 onMounted(loadData)
 </script>
 
@@ -141,7 +157,17 @@ onMounted(loadData)
 .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
 .page-title { font-family:var(--font-head); font-size:26px; font-weight:800; }
 .page-sub { color:var(--muted); font-size:13px; margin-top:2px; }
-.header-actions { display:flex; gap:10px; }
+.header-actions { display:flex; gap:10px; align-items:center; }
+
+.logout-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: var(--radius-sm);
+  background: transparent; border: 1px solid var(--border);
+  cursor: pointer; color: var(--muted2);
+  font-size: 13px; font-weight: 500;
+  transition: all var(--transition);
+}
+.logout-btn:hover { background: #ff444415; color: #ff4444; border-color: #ff444440; }
 
 .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
 .stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
