@@ -30,8 +30,11 @@ const handleLogin = async () => {
   error.value = ''
   try {
     const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, form.value)
-    localStorage.setItem('token', res.data.token)
-    window.location.href = '/dashboard'
+    const token = res.data.token
+    localStorage.setItem('token', token)
+    // Tunggu token tersimpan dulu
+    await new Promise(resolve => setTimeout(resolve, 100))
+    window.location.replace('/dashboard')
   } catch (e) {
     error.value = e.response?.data?.message || 'Login gagal'
   } finally {

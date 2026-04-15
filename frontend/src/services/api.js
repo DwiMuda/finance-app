@@ -7,8 +7,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-// ── Tambahkan token di setiap request ──
-// ── Auto logout jika token expired ──
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
 api.interceptors.response.use(
   response => response,
   error => {
@@ -20,19 +24,6 @@ api.interceptors.response.use(
   }
 )
 
-// ── Auto logout jika token expired ──
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  }
-)
-
-// ── Ubah format month "2025-01" → { bulan: 1, tahun: 2025 } ──
 const parseMonth = (month) => {
   if (!month) return {}
   const [tahun, bulan] = month.split('-')
