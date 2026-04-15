@@ -1,16 +1,11 @@
-// models/transactionModel.js
 const pool = require('../config/database');
 
 const TransactionModel = {
 
-  // Ambil semua transaksi dengan filter opsional
-  async getAll({ bulan, tahun, tipe }) {
-    let query = `
-      SELECT * FROM transactions
-      WHERE 1=1
-    `;
-    const params = [];
-    let idx = 1;
+  async getAll({ bulan, tahun, tipe, user_id }) {
+    let query = `SELECT * FROM transactions WHERE user_id = $1`;
+    const params = [user_id];
+    let idx = 2;
 
     if (bulan && tahun) {
       query += ` AND EXTRACT(MONTH FROM tanggal) = $${idx++}
@@ -24,55 +19,49 @@ const TransactionModel = {
     }
 
     query += ' ORDER BY tanggal DESC, id DESC';
-
     const result = await pool.query(query, params);
     return result.rows;
   },
 
-  // Ambil satu transaksi berdasarkan ID
-  async getById(id) {
+  async getById(id, user_id) {
     const result = await pool.query(
-      'SELECT * FROM transactions WHERE id = $1',
-      [id]
+      'SELECT * FROM transactions WHERE id = $1 AND user_id = $2',
+      [id, user_id]
     );
     return result.rows[0];
   },
 
-  // Tambah transaksi baru
-  async create({ tanggal, kategori, deskripsi, jumlah, tipe }) {
+  async create({ tanggal, kategori, deskripsi, jumlah, tipe, user_id }) {
     const result = await pool.query(
-      `INSERT INTO transactions (tanggal, kategori, deskripsi, jumlah, tipe)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO transactions (tanggal, kategori, deskripsi, jumlah, tipe, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [tanggal, kategori, deskripsi, jumlah, tipe]
+      [tanggal, kategori, deskripsi, jumlah, tipe, user_id]
     );
     return result.rows[0];
   },
 
-  // Update transaksi
-  async update(id, { tanggal, kategori, deskripsi, jumlah, tipe }) {
+  async update(id, { tanggal, kategori, deskripsi, jumlah, tipe }, user_id) {
     const result = await pool.query(
       `UPDATE transactions
        SET tanggal = $1, kategori = $2, deskripsi = $3,
            jumlah = $4, tipe = $5, updated_at = NOW()
-       WHERE id = $6
+       WHERE id = $6 AND user_id = $7
        RETURNING *`,
-      [tanggal, kategori, deskripsi, jumlah, tipe, id]
+      [tanggal, kategori, deskripsi, jumlah, tipe, id, user_id]
     );
     return result.rows[0];
   },
 
-  // Hapus transaksi
-  async delete(id) {
+  async delete(id, user_id) {
     const result = await pool.query(
-      'DELETE FROM transactions WHERE id = $1 RETURNING *',
-      [id]
+      'DELETE FROM transactions WHERE id = $1 AND user_id = $2 RETURNING *',
+      [id, user_id]
     );
     return result.rows[0];
   },
 
-  // Hitung ringkasan (total income, expense, saldo) per bulan
-  async getSummary({ bulan, tahun }) {
+  async getSummary({ bulan, tahun, user_id }) {
     const result = await pool.query(
       `SELECT
         SUM(CASE WHEN tipe = 'income'  THEN jumlah ELSE 0 END) AS total_income,
@@ -80,9 +69,10 @@ const TransactionModel = {
         SUM(CASE WHEN tipe = 'income'  THEN jumlah
                  WHEN tipe = 'expense' THEN -jumlah ELSE 0 END) AS saldo
        FROM transactions
-       WHERE EXTRACT(MONTH FROM tanggal) = $1
-         AND EXTRACT(YEAR  FROM tanggal) = $2`,
-      [bulan, tahun]
+       WHERE user_id = $1
+         AND EXTRACT(MONTH FROM tanggal) = $2
+         AND EXTRACT(YEAR  FROM tanggal) = $3`,
+      [user_id, bulan, tahun]
     );
     return result.rows[0];
   }

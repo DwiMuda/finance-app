@@ -32,7 +32,7 @@ const handleLogin = async () => {
     const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, form.value)
     const token = res.data.token
     localStorage.setItem('token', token)
-    // Tunggu token tersimpan dulu
+    localStorage.setItem('nama', res.data.nama)
     await new Promise(resolve => setTimeout(resolve, 100))
     window.location.replace('/dashboard')
   } catch (e) {
