@@ -19,7 +19,8 @@ const pool = new Pool(
 
 pool.connect((err, client, release) => {
   if (err) {
-    console.error('❌ Gagal konek ke PostgreSQL:', err.message);
+    console.error('⚠️ Peringatan: Gagal konek ke PostgreSQL saat startup:', err.message);
+    console.error('ℹ️ Server tetap berjalan, tetapi fitur database mungkin tidak berfungsi.');
     return;
   }
   console.log('✅ PostgreSQL terhubung!');

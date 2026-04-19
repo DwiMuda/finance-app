@@ -90,7 +90,11 @@ const TransactionController = {
       res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
     } catch (err) {
       console.error('update error:', err);
-      res.status(500).json({ success: false, message: 'Gagal update transaksi' });
+      res.status(500).json({ 
+        success: false, 
+        message: 'Gagal update transaksi',
+        debug: err.message // Menampilkan pesan error asli
+      });
     }
   },
 
