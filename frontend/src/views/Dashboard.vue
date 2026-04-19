@@ -22,24 +22,29 @@
     </div>
 
     <!-- Stat Cards -->
+    <div class="currency-switcher">
+      <button :class="{ active: activeCurrency === 'IDR' }" @click="activeCurrency = 'IDR'">Rp Rupiah</button>
+      <button :class="{ active: activeCurrency === 'JPY' }" @click="activeCurrency = 'JPY'">¥ Yen</button>
+    </div>
+
     <div class="stats-grid">
       <div class="stat-card income-card">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
         <div class="stat-label">Pemasukan</div>
-        <div class="stat-value">{{ formatRupiah(summary.totalIncome) }}</div>
-        <div class="stat-sub">{{ summary.incomeCount }} transaksi</div>
+        <div class="stat-value">{{ formatCurrency(currentSummary.total_income, activeCurrency) }}</div>
+        <div class="stat-sub">{{ currentSummary.income_count }} transaksi</div>
       </div>
       <div class="stat-card expense-card">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
         <div class="stat-label">Pengeluaran</div>
-        <div class="stat-value">{{ formatRupiah(summary.totalExpense) }}</div>
-        <div class="stat-sub">{{ summary.expenseCount }} transaksi</div>
+        <div class="stat-value">{{ formatCurrency(currentSummary.total_expense, activeCurrency) }}</div>
+        <div class="stat-sub">{{ currentSummary.expense_count }} transaksi</div>
       </div>
-      <div class="stat-card saldo-card" :class="summary.saldo >= 0 ? 'positive' : 'negative'">
+      <div class="stat-card saldo-card" :class="currentSummary.saldo >= 0 ? 'positive' : 'negative'">
         <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
         <div class="stat-label">Saldo Akhir</div>
-        <div class="stat-value">{{ formatRupiah(summary.saldo) }}</div>
-        <div class="stat-sub">{{ summary.saldo >= 0 ? '▲ Surplus' : '▼ Defisit' }}</div>
+        <div class="stat-value">{{ formatCurrency(currentSummary.saldo, activeCurrency) }}</div>
+        <div class="stat-sub">{{ currentSummary.saldo >= 0 ? '▲ Surplus' : '▼ Defisit' }}</div>
       </div>
     </div>
 
@@ -80,7 +85,7 @@
             <td><span class="kategori-chip">{{ t.kategori }}</span></td>
             <td><span class="badge" :class="t.tipe">{{ t.tipe === 'income' ? 'Pemasukan' : 'Pengeluaran' }}</span></td>
             <td style="text-align:right" :class="t.tipe === 'income' ? 'amount-income' : 'amount-expense'">
-              {{ t.tipe === 'income' ? '+' : '-' }}{{ formatRupiah(t.jumlah) }}
+              {{ t.tipe === 'income' ? '+' : '-' }}{{ formatCurrency(t.jumlah, t.mata_uang) }}
             </td>
           </tr>
         </tbody>
@@ -98,7 +103,13 @@ const router = useRouter()
 
 const loading = ref(true)
 const recentTransactions = ref([])
-const summary = ref({ totalIncome: 0, totalExpense: 0, saldo: 0, incomeCount: 0, expenseCount: 0 })
+const activeCurrency = ref('IDR')
+const summary = ref({
+  IDR: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 },
+  JPY: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 }
+})
+
+const currentSummary = computed(() => summary.value[activeCurrency.value])
 
 const now = new Date()
 const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`)
@@ -115,12 +126,17 @@ const monthOptions = computed(() => {
 })
 
 const expenseRatio = computed(() => {
-  if (!summary.value.totalIncome) return 0
-  return Math.min(100, Math.round((summary.value.totalExpense / summary.value.totalIncome) * 100))
+  const s = currentSummary.value
+  if (!s.total_income) return 0
+  return Math.min(100, Math.round((s.total_expense / s.total_income) * 100))
 })
 
-const formatRupiah = (val) => {
-  return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', maximumFractionDigits:0 }).format(val || 0)
+const formatCurrency = (val, currency = 'IDR') => {
+  return new Intl.NumberFormat(currency === 'IDR' ? 'id-ID' : 'ja-JP', { 
+    style: 'currency', 
+    currency: currency, 
+    maximumFractionDigits: 0 
+  }).format(val || 0)
 }
 
 const formatDate = (d) => {
@@ -135,7 +151,9 @@ const loadData = async () => {
       getSummary({ month: selectedMonth.value })
     ])
     recentTransactions.value = txRes.data.data || txRes.data
-    summary.value = sumRes.data
+    if (sumRes.data.data) {
+      summary.value = sumRes.data.data
+    }
   } catch (e) {
     console.error(e)
   } finally {
@@ -158,6 +176,16 @@ onMounted(loadData)
 .page-title { font-family:var(--font-head); font-size:26px; font-weight:800; }
 .page-sub { color:var(--muted); font-size:13px; margin-top:2px; }
 .header-actions { display:flex; gap:10px; align-items:center; }
+
+.currency-switcher { display: flex; gap: 8px; margin-bottom: 16px; }
+.currency-switcher button {
+  padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.currency-switcher button.active {
+  background: var(--primary); color: white; border-color: var(--primary);
+}
 
 .logout-btn {
   display: flex; align-items: center; gap: 7px;

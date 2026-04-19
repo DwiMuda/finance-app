@@ -60,7 +60,7 @@
               <td><span class="kategori-chip">{{ t.kategori }}</span></td>
               <td><span class="badge" :class="t.tipe">{{ t.tipe === 'income' ? 'Pemasukan' : 'Pengeluaran' }}</span></td>
               <td style="text-align:right" :class="t.tipe === 'income' ? 'amount-income' : 'amount-expense'">
-                {{ t.tipe === 'income' ? '+' : '-' }}{{ formatRupiah(t.jumlah) }}
+                {{ t.tipe === 'income' ? '+' : '-' }}{{ formatCurrency(t.jumlah, t.mata_uang) }}
               </td>
               <td>
                 <div class="action-btns">
@@ -111,9 +111,18 @@
               <label>Deskripsi *</label>
               <input class="input" v-model="form.deskripsi" placeholder="Masukkan keterangan..." required />
             </div>
-            <div class="form-group">
-              <label>Jumlah (Rp) *</label>
-              <input type="number" class="input" v-model="form.jumlah" placeholder="0" min="1" required />
+            <div class="form-row">
+              <div class="form-group">
+                <label>Mata Uang *</label>
+                <select class="select" v-model="form.mata_uang" required>
+                  <option value="IDR">Rupiah (IDR)</option>
+                  <option value="JPY">Yen (JPY)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Jumlah *</label>
+                <input type="number" class="input" v-model="form.jumlah" placeholder="0" min="1" required />
+              </div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-ghost" @click="closeModal">Batal</button>
@@ -179,7 +188,7 @@ const monthOptions = computed(() => {
 const kategoriIncome = ['Gaji', 'Freelance', 'Investasi', 'Bonus', 'Hadiah', 'Lainnya']
 const kategoriExpense = ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Kesehatan', 'Hiburan', 'Pendidikan', 'Tabungan', 'Lainnya']
 
-const form = ref({ tipe: 'expense', tanggal: new Date().toISOString().split('T')[0], kategori: '', deskripsi: '', jumlah: '' })
+const form = ref({ tipe: 'expense', tanggal: new Date().toISOString().split('T')[0], kategori: '', deskripsi: '', jumlah: '', mata_uang: 'IDR' })
 
 watch(() => form.value.tipe, (v) => { form.value.kategori = '' })
 
@@ -192,7 +201,13 @@ const filteredTransactions = computed(() => {
   })
 })
 
-const formatRupiah = (v) => new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', maximumFractionDigits:0 }).format(v || 0)
+const formatCurrency = (v, currency = 'IDR') => {
+  return new Intl.NumberFormat(currency === 'IDR' ? 'id-ID' : 'ja-JP', { 
+    style: 'currency', 
+    currency: currency, 
+    maximumFractionDigits: 0 
+  }).format(v || 0)
+}
 const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })
 
 const loadTransactions = async () => {
@@ -207,10 +222,24 @@ const loadTransactions = async () => {
 const openModal = (t = null) => {
   if (t) {
     editingId.value = t.id
-    form.value = { tipe: t.tipe, tanggal: t.tanggal?.split('T')[0], kategori: t.kategori, deskripsi: t.deskripsi, jumlah: t.jumlah }
+    form.value = { 
+      tipe: t.tipe, 
+      tanggal: t.tanggal?.split('T')[0], 
+      kategori: t.kategori, 
+      deskripsi: t.deskripsi, 
+      jumlah: t.jumlah,
+      mata_uang: t.mata_uang || 'IDR'
+    }
   } else {
     editingId.value = null
-    form.value = { tipe: 'expense', tanggal: new Date().toISOString().split('T')[0], kategori: '', deskripsi: '', jumlah: '' }
+    form.value = { 
+      tipe: 'expense', 
+      tanggal: new Date().toISOString().split('T')[0], 
+      kategori: '', 
+      deskripsi: '', 
+      jumlah: '',
+      mata_uang: 'IDR'
+    }
   }
   showModal.value = true
 }

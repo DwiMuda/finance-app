@@ -21,14 +21,29 @@ const TransactionController = {
       const tahun = req.query.tahun || now.getFullYear();
       const user_id = req.user.id;
 
-      const summary = await TransactionModel.getSummary({ bulan, tahun, user_id });
+      const summaryRows = await TransactionModel.getSummary({ bulan, tahun, user_id });
+      
+      // Default summary structure
+      const data = {
+        IDR: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 },
+        JPY: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 }
+      };
+
+      summaryRows.forEach(row => {
+        if (data[row.mata_uang]) {
+          data[row.mata_uang] = {
+            total_income:  parseFloat(row.total_income)  || 0,
+            total_expense: parseFloat(row.total_expense) || 0,
+            saldo:         parseFloat(row.saldo)         || 0,
+            income_count:  parseInt(row.income_count)    || 0,
+            expense_count: parseInt(row.expense_count)   || 0
+          };
+        }
+      });
+
       res.json({
         success: true, bulan, tahun,
-        data: {
-          total_income:  parseFloat(summary.total_income)  || 0,
-          total_expense: parseFloat(summary.total_expense) || 0,
-          saldo:         parseFloat(summary.saldo)         || 0
-        }
+        data: data
       });
     } catch (err) {
       console.error('getSummary error:', err);
@@ -38,7 +53,7 @@ const TransactionController = {
 
   async create(req, res) {
     try {
-      const { tanggal, kategori, deskripsi, jumlah, tipe } = req.body;
+      const { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang } = req.body;
       const user_id = req.user.id;
 
       if (!tanggal || !kategori || !jumlah || !tipe)
@@ -47,10 +62,13 @@ const TransactionController = {
       if (!['income', 'expense'].includes(tipe))
         return res.status(400).json({ success: false, message: 'Tipe harus "income" atau "expense"' });
 
+      if (mata_uang && !['IDR', 'JPY'].includes(mata_uang))
+        return res.status(400).json({ success: false, message: 'Mata uang harus IDR atau JPY' });
+
       if (isNaN(jumlah) || jumlah <= 0)
         return res.status(400).json({ success: false, message: 'Jumlah harus angka positif' });
 
-      const newTransaction = await TransactionModel.create({ tanggal, kategori, deskripsi, jumlah, tipe, user_id });
+      const newTransaction = await TransactionModel.create({ tanggal, kategori, deskripsi, jumlah, tipe, user_id, mata_uang: mata_uang || 'IDR' });
       res.status(201).json({ success: true, message: 'Transaksi berhasil ditambahkan', data: newTransaction });
     } catch (err) {
       console.error('create error:', err);
@@ -62,13 +80,13 @@ const TransactionController = {
     try {
       const { id } = req.params;
       const user_id = req.user.id;
-      const { tanggal, kategori, deskripsi, jumlah, tipe } = req.body;
+      const { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang } = req.body;
 
       const existing = await TransactionModel.getById(id, user_id);
       if (!existing)
         return res.status(404).json({ success: false, message: `Transaksi tidak ditemukan` });
 
-      const updated = await TransactionModel.update(id, { tanggal, kategori, deskripsi, jumlah, tipe }, user_id);
+      const updated = await TransactionModel.update(id, { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang: mata_uang || 'IDR' }, user_id);
       res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
     } catch (err) {
       console.error('update error:', err);
