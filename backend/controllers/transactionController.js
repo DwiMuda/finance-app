@@ -16,20 +16,23 @@ function parseMonthYear(query) {
 const TransactionController = {
 
   async getAll(req, res) {
-    try {
-      const { tipe } = req.query;
-      const user_id = req.user.id;
+  try {
+    console.log('getAll dipanggil, query:', req.query)  // ← tambah ini
+    console.log('user:', req.user)                       // ← tambah ini
 
-      // Ambil bulan & tahun dari "month=2026-04" atau "bulan=4&tahun=2026"
-      const { bulan, tahun } = parseMonthYear(req.query);
+    const { tipe, limit } = req.query;
+    const user_id = req.user.id;
+    const { bulan, tahun } = parseMonthYear(req.query);
 
-      const transactions = await TransactionModel.getAll({ bulan, tahun, tipe, user_id });
-      res.json({ success: true, count: transactions.length, data: transactions });
-    } catch (err) {
-      console.error('getAll error:', err);
-      res.status(500).json({ success: false, message: 'Gagal mengambil data transaksi' });
-    }
-  },
+    console.log('params:', { bulan, tahun, tipe, user_id, limit }) // ← tambah ini
+
+    const transactions = await TransactionModel.getAll({ bulan, tahun, tipe, user_id, limit });
+    res.json({ success: true, count: transactions.length, data: transactions });
+  } catch (err) {
+    console.error('getAll error:', err);
+    res.status(500).json({ success: false, message: 'Gagal mengambil data transaksi', debug: err.message });
+  }
+},
 
   async getSummary(req, res) {
     try {
