@@ -373,7 +373,7 @@ onMounted(loadTransactions)
 .m-actions button { background: none; border: none; font-weight: 800; font-size: 13px; color: #4f46e5; cursor: pointer; }
 .m-actions button.danger { color: #dc2626; }
 
-/* Modals & Utils */
+/* Add/Edit Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 28px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
@@ -395,6 +395,36 @@ onMounted(loadTransactions)
 .btn-save { flex: 2; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; }
 .btn-cancel { flex: 1; padding: 14px; background: white; border: 1px solid #e5e7eb; border-radius: 14px; color: #6b7280; font-weight: 700; cursor: pointer; }
 
+/* Delete Confirm Modal */
+.modal-overlay-dark {
+  position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(8px); display: flex; align-items: center;
+  justify-content: center; z-index: 1000; padding: 20px;
+}
+.confirm-box {
+  background: white; border-radius: 24px; padding: 40px 32px;
+  text-align: center; max-width: 360px; width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+}
+.warn-icon { font-size: 48px; margin-bottom: 16px; }
+.confirm-box h3 { font-size: 20px; font-weight: 900; color: #111827; margin-bottom: 8px; }
+.confirm-box p { color: #6b7280; font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 12px; }
+.confirm-actions .btn-cancel { flex: 1; padding: 14px; }
+.btn-danger-fill {
+  flex: 2; padding: 14px; background: #ef4444; color: white;
+  border: none; border-radius: 14px; font-weight: 800; cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-danger-fill:hover { background: #dc2626; }
+.btn-danger-fill:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Transitions */
+.slide-up-enter-active, .slide-up-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(20px); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
 /* Responsive */
 .mobile-only { display: none; }
 @media (max-width: 1024px) {
@@ -408,6 +438,7 @@ onMounted(loadTransactions)
   .premium-select-sm { flex: 1; padding: 8px 10px; font-size: 12px; }
   .form-grid { grid-template-columns: 1fr; }
   .f-group.full { grid-column: auto; }
+  .confirm-box { padding: 28px 20px; }
 }
 
 @media (max-width: 400px) {
