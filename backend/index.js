@@ -10,54 +10,38 @@ const authMiddleware    = require('./middleware/auth');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// backend/index.js
-
-// Ganti bagian app.use(cors(...)) yang lama dengan ini:
+// 1. CORS dulu
 app.use(cors({
   origin: [
-    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app', // Domain Vercel Anda
-    'http://localhost:5173' // Untuk keperluan testing lokal
+    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app',
+    'http://localhost:5173'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}));
+}))
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// 2. Body parser — HARUS sebelum routes
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// 3. Routes
+app.get('/health', (req, res) => res.json({ status: 'ok' }))
+app.get('/', (req, res) => res.json({ success: true, message: 'FinTrack API Running' }))
 
-app.get('/', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'FinTrack API Server is Running',
-    version: '2.0.0',
-    status: 'online'
-  });
-});
+app.use('/api/auth', authRoutes)
+app.use('/api/transactions', authMiddleware, transactionRoutes)
 
-app.use('/api/auth', authRoutes);
-app.use('/api/transactions', authMiddleware, transactionRoutes);
-
+// 4. Error handlers
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Route ${req.path} tidak ditemukan` });
-});
+  res.status(404).json({ success: false, message: `Route ${req.path} tidak ditemukan` })
+})
 
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ success: false, message: 'Internal server error' });
-});
+  console.error('Unhandled error:', err)
+  res.status(500).json({ success: false, message: 'Internal server error', debug: err.message })
+})
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
-  console.log(`📋 Endpoints tersedia:`);
-  console.log(`   GET    /api/transactions`);
-  console.log(`   GET    /api/transactions/summary`);
-  console.log(`   GET    /api/transactions/export`);
-  console.log(`   POST   /api/transactions`);
-  console.log(`   PUT    /api/transactions/:id`);
-  console.log(`   DELETE /api/transactions/:id`);
-});
+  console.log(`Server berjalan di port ${PORT}`)
+})
