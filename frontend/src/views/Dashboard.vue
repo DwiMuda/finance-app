@@ -181,17 +181,41 @@ const formatCurrency = (val, currency = 'IDR') => {
 
 const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
 
-// Summary — backend mengembalikan { success, data: { IDR: {...}, JPY: {...} } }
-if (sumRes.status === 'fulfilled') {
-  const sumData = sumRes.value.data
-  if (sumData && sumData.data) {
-    summary.value = {
-      IDR: { ...sumData.data.IDR },
-      JPY: { ...sumData.data.JPY }
+const loadData = async () => {
+  loading.value = true
+  try {
+    const [tahun, bulan] = selectedMonth.value.split('-')
+
+    const [txRes, sumRes] = await Promise.allSettled([
+      getTransactions({ bulan, tahun, limit: 6 }),
+      getSummary({ bulan, tahun })
+    ])
+
+    if (txRes.status === 'fulfilled') {
+      const txData = txRes.value.data
+      recentTransactions.value = txData.data || txData || []
+    } else {
+      console.error('Gagal load transaksi:', txRes.reason)
+      recentTransactions.value = []
     }
+
+    if (sumRes.status === 'fulfilled') {
+      const sumData = sumRes.value.data
+      if (sumData && sumData.data) {
+        summary.value = {
+          IDR: { ...sumData.data.IDR },
+          JPY: { ...sumData.data.JPY }
+        }
+      }
+    } else {
+      console.error('Gagal load summary:', sumRes.reason)
+    }
+
+  } catch (e) {
+    console.error('loadData error:', e)
+  } finally {
+    loading.value = false
   }
-} else {
-  console.error('Gagal load summary:', sumRes.reason)
 }
 
 const logout = () => {
