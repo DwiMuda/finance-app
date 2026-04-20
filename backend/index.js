@@ -32,6 +32,17 @@ app.get('/', (req, res) => res.json({ success: true, message: 'FinTrack API Runn
 app.use('/api/auth', authRoutes)
 app.use('/api/transactions', authMiddleware, transactionRoutes)
 
+app.use(cors({
+  origin: [
+    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app',
+    'https://finance-app-hcrr.vercel.app',  // ← tambah ini
+    'http://localhost:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}))
+
 // 4. Error handlers
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.path} tidak ditemukan` })
