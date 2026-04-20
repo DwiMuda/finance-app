@@ -303,17 +303,28 @@ onMounted(loadData)
 }
 
 @media (max-width: 768px) {
-  .stats-container { grid-template-columns: 1fr; }
-  .welcome-text h1 { font-size: 24px; }
-  .amount-text { font-size: 22px; }
+  .stats-container { grid-template-columns: 1fr; gap: 12px; }
+  .welcome-text h1 { font-size: 22px; }
+  .amount-text { font-size: 20px; }
+  .stat-box { padding: 18px; }
 }
 
 @media (max-width: 480px) {
-  .header-content { flex-direction: column; align-items: flex-start; }
+  .header-content { flex-direction: column; align-items: flex-start; gap: 12px; }
   .header-actions { width: 100%; justify-content: space-between; }
-  .premium-select { flex: 1; }
+  .premium-select { padding: 8px 30px 8px 12px; font-size: 13px; }
   .tab-label { display: none; }
-  .tabs-container button { padding: 10px 14px; }
+  .tabs-container button { padding: 8px 12px; }
+  .amount-text { font-size: 18px; }
+  .card-title { font-size: 16px; }
+  .recent-table th, .recent-table td { padding: 12px 8px; font-size: 12px; }
+  .td-desc { font-size: 13px; }
+}
+
+@media (max-width: 350px) {
+  .welcome-text h1 { font-size: 20px; }
+  .amount-text { font-size: 16px; }
+  .stat-header span { font-size: 11px; }
 }
 
 .loading-placeholder, .empty-placeholder { padding: 40px; text-align: center; color: #9ca3af; font-weight: 600; font-size: 14px; }

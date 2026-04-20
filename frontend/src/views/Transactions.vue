@@ -403,10 +403,20 @@ onMounted(loadTransactions)
 @media (max-width: 768px) {
   .desktop-only { display: none; }
   .mobile-only { display: block; }
-  .filters-card { flex-direction: column; align-items: stretch; }
-  .filter-actions { justify-content: space-between; }
+  .filters-card { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px; }
+  .filter-actions { justify-content: space-between; gap: 6px; }
+  .premium-select-sm { flex: 1; padding: 8px 10px; font-size: 12px; }
   .form-grid { grid-template-columns: 1fr; }
   .f-group.full { grid-column: auto; }
+}
+
+@media (max-width: 400px) {
+  .page-header h1 { font-size: 20px; }
+  .btn-add-premium span { display: none; }
+  .btn-add-premium { padding: 10px; border-radius: 50%; width: 44px; height: 44px; justify-content: center; }
+  .m-desc { font-size: 14px; }
+  .m-amount { font-size: 16px; }
+  .modal-card { padding: 20px; }
 }
 
 .text-right { text-align: right; }

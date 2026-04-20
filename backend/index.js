@@ -27,6 +27,15 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'FinTrack API Server is Running',
+    version: '2.0.0',
+    status: 'online'
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', authMiddleware, transactionRoutes);
 

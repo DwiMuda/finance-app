@@ -331,24 +331,36 @@ onUnmounted(() => {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 70px;
+    height: 65px; /* Lebih pendek */
     flex-direction: row;
-    padding: 0 20px;
+    padding: 0 10px;
     border-right: none;
     border-top: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
   }
   .sidebar-brand, .sidebar-footer { display: none; }
   .sidebar-nav {
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+    width: 100%;
   }
   .nav-item {
     flex-direction: column;
-    gap: 4px;
-    padding: 8px;
+    gap: 2px;
+    padding: 6px;
+    font-size: 10px; /* Teks sangat kecil untuk HP */
+    flex: 1;
+    justify-content: center;
   }
-  .mobile-header { display: flex; }
-  .content-view { padding: 20px; }
+  .nav-icon svg { width: 20px; height: 20px; }
+  .mobile-header { display: flex; padding: 12px 16px; }
+  .content-view { padding: 12px; }
+}
+
+@media (max-width: 360px) {
+  .nav-item span { display: none; } /* Sembunyikan teks jika HP sangat kecil */
+  .nav-icon { margin-bottom: 0; }
 }
 </style>

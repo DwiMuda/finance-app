@@ -53,18 +53,30 @@ body {
 
 @media (max-width: 640px) {
   .main-content {
-    padding: 1rem;
-    padding-bottom: 5rem; /* Ruang untuk bottom nav jika ada */
+    padding: 12px; /* Padding lebih kecil untuk HP */
+    padding-bottom: 80px; /* Ruang ekstra untuk bottom nav */
   }
 }
 
-/* Utility Components */
+/* Memastikan gambar dan elemen besar tidak meluber */
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  padding: 1.5rem;
+  padding: 1.25rem;
+}
+
+@media (max-width: 400px) {
+  .card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
 }
 
 .btn {
