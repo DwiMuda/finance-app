@@ -186,21 +186,26 @@ const loadData = async () => {
   try {
     const [tahun, bulan] = selectedMonth.value.split('-')
 
-    // Pisah pakai allSettled agar kalau satu gagal, yang lain tetap jalan
     const [txRes, sumRes] = await Promise.allSettled([
       getTransactions({ bulan, tahun, limit: 6 }),
       getSummary({ bulan, tahun })
     ])
 
+    // Transaksi terbaru
     if (txRes.status === 'fulfilled') {
-      recentTransactions.value = txRes.value.data.data || txRes.value.data || []
+      const txData = txRes.value.data
+      recentTransactions.value = txData.data || txData || []
     } else {
       console.error('Gagal load transaksi:', txRes.reason)
       recentTransactions.value = []
     }
 
+    // Summary — backend mengembalikan { success, data: { IDR: {...}, JPY: {...} } }
     if (sumRes.status === 'fulfilled') {
-      if (sumRes.value.data.data) summary.value = sumRes.value.data.data
+      const sumData = sumRes.value.data
+      if (sumData.data) {
+        summary.value = sumData.data  // { IDR: {...}, JPY: {...} }
+      }
     } else {
       console.error('Gagal load summary:', sumRes.reason)
     }

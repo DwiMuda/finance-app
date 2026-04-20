@@ -39,19 +39,10 @@ export const createTransaction = (data) => api.post('/transactions', data)
 export const updateTransaction  = (id, data) => api.put(`/transactions/${id}`, data)
 export const deleteTransaction  = (id) => api.delete(`/transactions/${id}`)
 
-export const getSummary = async (params = {}) => {
-  const { month } = params
-  const res = await api.get('/transactions/summary', { params: parseMonth(month) })
-  const d = res.data.data || res.data
-  return {
-    data: {
-      totalIncome:   d.total_income  || d.totalIncome  || 0,
-      totalExpense:  d.total_expense || d.totalExpense  || 0,
-      saldo:         d.saldo         || 0,
-      incomeCount:   d.income_count  || d.incomeCount   || 0,
-      expenseCount:  d.expense_count || d.expenseCount  || 0,
-    }
-  }
+// ← FIX: jangan reshape response, kembalikan apa adanya dari backend
+export const getSummary = (params = {}) => {
+  const { month, ...rest } = params
+  return api.get('/transactions/summary', { params: { ...parseMonth(month), ...rest } })
 }
 
 export const exportExcel = async (params = {}) => {
