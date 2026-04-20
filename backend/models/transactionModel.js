@@ -1,85 +1,128 @@
-const pool = require('../config/database');
+const TransactionModel = require('../models/transactionModel');
 
-const TransactionModel = {
+function parseMonthYear(query) {
+  if (query.month) {
+    const [tahun, bulan] = query.month.split('-');
+    return { bulan: parseInt(bulan), tahun: parseInt(tahun) };
+  }
+  const now = new Date();
+  return {
+    bulan: parseInt(query.bulan) || now.getMonth() + 1,
+    tahun: parseInt(query.tahun) || now.getFullYear()
+  };
+}
 
-  async getAll({ bulan, tahun, tipe, user_id }) {
-    let query = `SELECT * FROM transactions WHERE user_id = $1`;
-    const params = [user_id];
-    let idx = 2;
+const TransactionController = {
 
-    if (bulan && tahun) {
-      query += ` AND EXTRACT(MONTH FROM tanggal) = $${idx++}
-                 AND EXTRACT(YEAR  FROM tanggal) = $${idx++}`;
-      params.push(bulan, tahun);
+  async getAll(req, res) {
+    try {
+      const { tipe, limit } = req.query;
+      const user_id = req.user.id;
+      const { bulan, tahun } = parseMonthYear(req.query);
+
+      const transactions = await TransactionModel.getAll({ bulan, tahun, tipe, user_id, limit });
+      res.json({ success: true, count: transactions.length, data: transactions });
+    } catch (err) {
+      console.error('getAll error:', err);
+      res.status(500).json({ success: false, message: 'Gagal mengambil data transaksi', debug: err.message });
     }
+  },
 
-    if (tipe) {
-      query += ` AND tipe = $${idx++}`;
-      params.push(tipe);
+  async getSummary(req, res) {
+    try {
+      const user_id = req.user.id;
+      const { bulan, tahun } = parseMonthYear(req.query);
+
+      const summaryRows = await TransactionModel.getSummary({ bulan, tahun, user_id });
+
+      const data = {
+        IDR: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 },
+        JPY: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 }
+      };
+
+      summaryRows.forEach(row => {
+        if (data[row.mata_uang]) {
+          data[row.mata_uang] = {
+            total_income:  parseFloat(row.total_income)  || 0,
+            total_expense: parseFloat(row.total_expense) || 0,
+            saldo:         parseFloat(row.saldo)         || 0,
+            income_count:  parseInt(row.income_count)    || 0,
+            expense_count: parseInt(row.expense_count)   || 0
+          };
+        }
+      });
+
+      res.json({ success: true, bulan, tahun, data });
+    } catch (err) {
+      console.error('getSummary error:', err);
+      res.status(500).json({ success: false, message: 'Gagal mengambil ringkasan', debug: err.message });
     }
-
-    query += ' ORDER BY tanggal DESC, id DESC';
-    const result = await pool.query(query, params);
-    return result.rows;
   },
 
-  async getById(id, user_id) {
-    const result = await pool.query(
-      'SELECT * FROM transactions WHERE id = $1 AND user_id = $2',
-      [id, user_id]
-    );
-    return result.rows[0];
+  async create(req, res) {
+    try {
+      const { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang } = req.body;
+      const user_id = req.user.id;
+
+      if (!tanggal || !kategori || !jumlah || !tipe)
+        return res.status(400).json({ success: false, message: 'Field tanggal, kategori, jumlah, dan tipe wajib diisi' });
+
+      if (!['income', 'expense'].includes(tipe))
+        return res.status(400).json({ success: false, message: 'Tipe harus "income" atau "expense"' });
+
+      if (mata_uang && !['IDR', 'JPY'].includes(mata_uang))
+        return res.status(400).json({ success: false, message: 'Mata uang harus IDR atau JPY' });
+
+      if (isNaN(jumlah) || jumlah <= 0)
+        return res.status(400).json({ success: false, message: 'Jumlah harus angka positif' });
+
+      const newTransaction = await TransactionModel.create({
+        tanggal, kategori, deskripsi, jumlah, tipe, user_id,
+        mata_uang: mata_uang || 'IDR'
+      });
+      res.status(201).json({ success: true, message: 'Transaksi berhasil ditambahkan', data: newTransaction });
+    } catch (err) {
+      console.error('create error:', err);
+      res.status(500).json({ success: false, message: 'Gagal menyimpan transaksi', debug: err.message });
+    }
   },
 
-  async create({ tanggal, kategori, deskripsi, jumlah, tipe, user_id, mata_uang = 'IDR' }) {
-    const result = await pool.query(
-      `INSERT INTO transactions (tanggal, kategori, deskripsi, jumlah, tipe, user_id, mata_uang)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [tanggal, kategori, deskripsi, jumlah, tipe, user_id, mata_uang]
-    );
-    return result.rows[0];
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const user_id = req.user.id;
+      const { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang } = req.body;
+
+      const existing = await TransactionModel.getById(id, user_id);
+      if (!existing)
+        return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
+
+      const updated = await TransactionModel.update(
+        id, { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang: mata_uang || 'IDR' }, user_id
+      );
+      res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
+    } catch (err) {
+      console.error('update error:', err);
+      res.status(500).json({ success: false, message: 'Gagal update transaksi', debug: err.message });
+    }
   },
 
-  async update(id, { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang }, user_id) {
-    const result = await pool.query(
-      `UPDATE transactions
-       SET tanggal = $1, kategori = $2, deskripsi = $3,
-           jumlah = $4, tipe = $5, mata_uang = $6, updated_at = NOW()
-       WHERE id = $7 AND user_id = $8
-       RETURNING *`,
-      [tanggal, kategori, deskripsi, jumlah, tipe, mata_uang, id, user_id]
-    );
-    return result.rows[0];
-  },
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const user_id = req.user.id;
 
-  async delete(id, user_id) {
-    const result = await pool.query(
-      'DELETE FROM transactions WHERE id = $1 AND user_id = $2 RETURNING *',
-      [id, user_id]
-    );
-    return result.rows[0];
-  },
+      const existing = await TransactionModel.getById(id, user_id);
+      if (!existing)
+        return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
 
-  async getSummary({ bulan, tahun, user_id }) {
-    const result = await pool.query(
-      `SELECT
-        mata_uang,
-        SUM(CASE WHEN tipe = 'income'  THEN jumlah ELSE 0 END) AS total_income,
-        SUM(CASE WHEN tipe = 'expense' THEN jumlah ELSE 0 END) AS total_expense,
-        SUM(CASE WHEN tipe = 'income'  THEN jumlah
-                 WHEN tipe = 'expense' THEN -jumlah ELSE 0 END) AS saldo,
-        COUNT(CASE WHEN tipe = 'income' THEN 1 END) as income_count,
-        COUNT(CASE WHEN tipe = 'expense' THEN 1 END) as expense_count
-       FROM transactions
-       WHERE user_id = $1
-         AND EXTRACT(MONTH FROM tanggal) = $2
-         AND EXTRACT(YEAR  FROM tanggal) = $3
-       GROUP BY mata_uang`,
-      [user_id, bulan, tahun]
-    );
-    return result.rows;
+      await TransactionModel.delete(id, user_id);
+      res.json({ success: true, message: 'Transaksi berhasil dihapus' });
+    } catch (err) {
+      console.error('delete error:', err);
+      res.status(500).json({ success: false, message: 'Gagal menghapus transaksi', debug: err.message });
+    }
   }
 };
 
-module.exports = TransactionModel;
+module.exports = TransactionController;

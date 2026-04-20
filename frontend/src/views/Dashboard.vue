@@ -174,8 +174,8 @@ const getHealthNote = computed(() => {
 })
 
 const formatCurrency = (val, currency = 'IDR') => {
-  return new Intl.NumberFormat(currency === 'IDR' ? 'id-ID' : 'ja-JP', { 
-    style: 'currency', currency: currency, maximumFractionDigits: 0 
+  return new Intl.NumberFormat(currency === 'IDR' ? 'id-ID' : 'ja-JP', {
+    style: 'currency', currency: currency, maximumFractionDigits: 0
   }).format(val || 0)
 }
 
@@ -184,18 +184,29 @@ const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit
 const loadData = async () => {
   loading.value = true
   try {
-    // Parse "2026-04" → bulan=4, tahun=2026
     const [tahun, bulan] = selectedMonth.value.split('-')
 
-    const [txRes, sumRes] = await Promise.all([
-      getTransactions({ bulan, tahun, limit: 6 }),  // ← fix: kirim bulan & tahun
-      getSummary({ bulan, tahun })                   // ← fix: kirim bulan & tahun
+    // Pisah pakai allSettled agar kalau satu gagal, yang lain tetap jalan
+    const [txRes, sumRes] = await Promise.allSettled([
+      getTransactions({ bulan, tahun, limit: 6 }),
+      getSummary({ bulan, tahun })
     ])
 
-    recentTransactions.value = txRes.data.data || txRes.data
-    if (sumRes.data.data) summary.value = sumRes.data.data
+    if (txRes.status === 'fulfilled') {
+      recentTransactions.value = txRes.value.data.data || txRes.value.data || []
+    } else {
+      console.error('Gagal load transaksi:', txRes.reason)
+      recentTransactions.value = []
+    }
+
+    if (sumRes.status === 'fulfilled') {
+      if (sumRes.value.data.data) summary.value = sumRes.value.data.data
+    } else {
+      console.error('Gagal load summary:', sumRes.reason)
+    }
+
   } catch (e) {
-    console.error(e)
+    console.error('loadData error:', e)
   } finally {
     loading.value = false
   }
