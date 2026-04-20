@@ -184,10 +184,14 @@ const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit
 const loadData = async () => {
   loading.value = true
   try {
+    // Parse "2026-04" → bulan=4, tahun=2026
+    const [tahun, bulan] = selectedMonth.value.split('-')
+
     const [txRes, sumRes] = await Promise.all([
-      getTransactions({ month: selectedMonth.value, limit: 6 }),
-      getSummary({ month: selectedMonth.value })
+      getTransactions({ bulan, tahun, limit: 6 }),  // ← fix: kirim bulan & tahun
+      getSummary({ bulan, tahun })                   // ← fix: kirim bulan & tahun
     ])
+
     recentTransactions.value = txRes.data.data || txRes.data
     if (sumRes.data.data) summary.value = sumRes.data.data
   } catch (e) {

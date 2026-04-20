@@ -1,11 +1,28 @@
 const TransactionModel = require('../models/transactionModel');
 
+// Helper: parse "YYYY-MM" atau query bulan/tahun terpisah
+function parseMonthYear(query) {
+  if (query.month) {
+    const [tahun, bulan] = query.month.split('-');
+    return { bulan: parseInt(bulan), tahun: parseInt(tahun) };
+  }
+  const now = new Date();
+  return {
+    bulan: parseInt(query.bulan) || now.getMonth() + 1,
+    tahun: parseInt(query.tahun) || now.getFullYear()
+  };
+}
+
 const TransactionController = {
 
   async getAll(req, res) {
     try {
-      const { bulan, tahun, tipe } = req.query;
+      const { tipe } = req.query;
       const user_id = req.user.id;
+
+      // Ambil bulan & tahun dari "month=2026-04" atau "bulan=4&tahun=2026"
+      const { bulan, tahun } = parseMonthYear(req.query);
+
       const transactions = await TransactionModel.getAll({ bulan, tahun, tipe, user_id });
       res.json({ success: true, count: transactions.length, data: transactions });
     } catch (err) {
@@ -16,14 +33,13 @@ const TransactionController = {
 
   async getSummary(req, res) {
     try {
-      const now   = new Date();
-      const bulan = req.query.bulan || now.getMonth() + 1;
-      const tahun = req.query.tahun || now.getFullYear();
       const user_id = req.user.id;
 
+      // Ambil bulan & tahun dari "month=2026-04" atau "bulan=4&tahun=2026"
+      const { bulan, tahun } = parseMonthYear(req.query);
+
       const summaryRows = await TransactionModel.getSummary({ bulan, tahun, user_id });
-      
-      // Default summary structure
+
       const data = {
         IDR: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 },
         JPY: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 }
@@ -41,10 +57,7 @@ const TransactionController = {
         }
       });
 
-      res.json({
-        success: true, bulan, tahun,
-        data: data
-      });
+      res.json({ success: true, bulan, tahun, data });
     } catch (err) {
       console.error('getSummary error:', err);
       res.status(500).json({ success: false, message: 'Gagal mengambil ringkasan' });
@@ -68,7 +81,10 @@ const TransactionController = {
       if (isNaN(jumlah) || jumlah <= 0)
         return res.status(400).json({ success: false, message: 'Jumlah harus angka positif' });
 
-      const newTransaction = await TransactionModel.create({ tanggal, kategori, deskripsi, jumlah, tipe, user_id, mata_uang: mata_uang || 'IDR' });
+      const newTransaction = await TransactionModel.create({
+        tanggal, kategori, deskripsi, jumlah, tipe, user_id,
+        mata_uang: mata_uang || 'IDR'
+      });
       res.status(201).json({ success: true, message: 'Transaksi berhasil ditambahkan', data: newTransaction });
     } catch (err) {
       console.error('create error:', err);
@@ -84,17 +100,15 @@ const TransactionController = {
 
       const existing = await TransactionModel.getById(id, user_id);
       if (!existing)
-        return res.status(404).json({ success: false, message: `Transaksi tidak ditemukan` });
+        return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
 
-      const updated = await TransactionModel.update(id, { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang: mata_uang || 'IDR' }, user_id);
+      const updated = await TransactionModel.update(
+        id, { tanggal, kategori, deskripsi, jumlah, tipe, mata_uang: mata_uang || 'IDR' }, user_id
+      );
       res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
     } catch (err) {
       console.error('update error:', err);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Gagal update transaksi',
-        debug: err.message // Menampilkan pesan error asli
-      });
+      res.status(500).json({ success: false, message: 'Gagal update transaksi', debug: err.message });
     }
   },
 
@@ -105,7 +119,7 @@ const TransactionController = {
 
       const existing = await TransactionModel.getById(id, user_id);
       if (!existing)
-        return res.status(404).json({ success: false, message: `Transaksi tidak ditemukan` });
+        return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
 
       await TransactionModel.delete(id, user_id);
       res.json({ success: true, message: 'Transaksi berhasil dihapus' });
