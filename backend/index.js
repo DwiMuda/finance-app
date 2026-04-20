@@ -10,8 +10,16 @@ const authMiddleware    = require('./middleware/auth');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// backend/index.js
+
+// Ganti bagian app.use(cors(...)) yang lama dengan ini:
 app.use(cors({
-  origin: true,
+  origin: [
+    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app', // Domain Vercel Anda
+    'http://localhost:5173' // Untuk keperluan testing lokal
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
