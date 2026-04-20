@@ -10,18 +10,14 @@ const authMiddleware    = require('./middleware/auth');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. CORS dulu
+// 1. CORS — satu saja, wildcard
 app.use(cors({
-  origin: [
-    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app',
-    'http://localhost:5173'
-  ],
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-// 2. Body parser — HARUS sebelum routes
+// 2. Body parser
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -31,17 +27,6 @@ app.get('/', (req, res) => res.json({ success: true, message: 'FinTrack API Runn
 
 app.use('/api/auth', authRoutes)
 app.use('/api/transactions', authMiddleware, transactionRoutes)
-
-app.use(cors({
-  origin: [
-    'https://finance-app-hcrr-9k06kc2e6-dwimudas-projects.vercel.app',
-    'https://finance-app-hcrr.vercel.app',  // ← tambah ini
-    'http://localhost:5173'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}))
 
 // 4. Error handlers
 app.use((req, res) => {
