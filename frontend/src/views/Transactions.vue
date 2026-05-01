@@ -14,6 +14,20 @@
       </div>
     </header>
 
+    <!-- Currency Tabs -->
+    <div class="currency-nav">
+      <div class="tabs-container">
+        <button :class="{ active: filterCurrency === 'IDR' }" @click="filterCurrency = 'IDR'">
+          <span class="tab-flag">🇮🇩</span>
+          <span class="tab-label">IDR (Rupiah)</span>
+        </button>
+        <button :class="{ active: filterCurrency === 'JPY' }" @click="filterCurrency = 'JPY'">
+          <span class="tab-flag">🇯🇵</span>
+          <span class="tab-label">JPY (Yen)</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Filters Bar -->
     <div class="filters-card">
       <div class="search-wrapper">
@@ -205,6 +219,7 @@ const deletingItem = ref(null)
 const search = ref('')
 const filterTipe = ref('')
 const filterMonth = ref('')
+const filterCurrency = ref('IDR')
 
 const now = new Date()
 const monthOptions = computed(() => {
@@ -235,7 +250,8 @@ const filteredTransactions = computed(() => {
     const matchSearch = !search.value || desc.toLowerCase().includes(search.value.toLowerCase())
     const matchTipe = !filterTipe.value || t.tipe === filterTipe.value
     const matchMonth = !filterMonth.value || (t.tanggal && t.tanggal.startsWith(filterMonth.value))
-    return matchSearch && matchTipe && matchMonth
+    const matchCurrency = (t.mata_uang || 'IDR') === filterCurrency.value
+    return matchSearch && matchTipe && matchMonth && matchCurrency
   })
 })
 
@@ -249,10 +265,27 @@ const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit
 const loadTransactions = async () => {
   loading.value = true
   try {
-    const res = await getTransactions({ all: true })
-    transactions.value = res.data.data || res.data
-  } catch (e) { console.error('Load error:', e) }
-  finally { loading.value = false }
+    const promises = monthOptions.value.map(m => getTransactions({ month: m.value }))
+    const results = await Promise.allSettled(promises)
+    
+    let allData = []
+    results.forEach(res => {
+      if (res.status === 'fulfilled') {
+        const d = res.value.data?.data || res.value.data
+        if (Array.isArray(d)) {
+          allData = allData.concat(d)
+        }
+      }
+    })
+    
+    // Sort transactions by date descending (newest first)
+    transactions.value = allData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
+  } catch (e) { 
+    console.error('Load error:', e) 
+  }
+  finally { 
+    loading.value = false 
+  }
 }
 
 const openModal = (t = null) => {
@@ -290,7 +323,7 @@ const deleteItem = async () => {
   finally { deleting.value = false }
 }
 
-const resetFilters = () => { search.value = ''; filterTipe.value = ''; filterMonth.value = '' }
+const resetFilters = () => { search.value = ''; filterTipe.value = ''; filterMonth.value = ''; filterCurrency.value = 'IDR'; }
 onMounted(loadTransactions)
 </script>
 
@@ -310,6 +343,19 @@ onMounted(loadTransactions)
   box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
 }
 .btn-add-premium:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 15px 20px -5px rgba(79, 70, 229, 0.3); }
+
+/* Currency Navigation */
+.currency-nav { margin-bottom: 20px; }
+.tabs-container {
+  display: flex; gap: 8px; background: #f3f4f6; padding: 6px; border-radius: 14px; width: fit-content;
+}
+.tabs-container button {
+  padding: 10px 18px; border-radius: 10px; border: none; background: transparent;
+  display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;
+  color: #6b7280; font-weight: 700; font-size: 13px;
+}
+.tabs-container button.active { background: white; color: #4f46e5; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.tab-flag { font-size: 18px; }
 
 /* Filters Bar */
 .filters-card {

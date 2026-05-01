@@ -170,7 +170,7 @@ const getHealthNote = computed(() => {
   const r = expenseRatio.value
   if (r > 80) return '⚠️ Pengeluaran hampir melebihi pendapatan!'
   if (r > 60) return '⚡ Hati-hati, pengeluaran cukup tinggi.'
-  return '✅ Keuangan Anda bulan ini dalam kondisi sehat.'
+  return '✨ Hebat! Keuangan Anda bulan ini sangat sehat dan stabil.'
 })
 
 const formatCurrency = (val, currency = 'IDR') => {
