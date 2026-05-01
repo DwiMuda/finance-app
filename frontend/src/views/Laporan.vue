@@ -90,7 +90,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getTransactions, getSummary } from '../services/api.js'
+import { getTransactions, getSummary, exportExcel } from '../services/api.js'
 
 const loading = ref(true)
 const exporting = ref(false)
@@ -183,11 +183,14 @@ const loadData = async () => {
 
 const exportData = async () => {
   exporting.value = true
-  // Mock export - in real world would call backend export endpoint
-  setTimeout(() => {
-    alert('Laporan berhasil diekspor ke Excel!')
+  try {
+    await exportExcel({ month: selectedMonth.value })
+  } catch (e) {
+    console.error(e)
+    alert('Gagal mengekspor data.')
+  } finally {
     exporting.value = false
-  }, 1500)
+  }
 }
 
 onMounted(loadData)

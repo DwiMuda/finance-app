@@ -187,7 +187,7 @@ const loadData = async () => {
     const [tahun, bulan] = selectedMonth.value.split('-')
 
     const [txRes, sumRes] = await Promise.allSettled([
-      getTransactions({ bulan, tahun, limit: 6 }),
+      getTransactions({ bulan, tahun }),
       getSummary({ bulan, tahun })
     ])
 
@@ -305,7 +305,7 @@ onMounted(loadData)
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .link-more { font-size: 13px; font-weight: 700; color: #4f46e5; text-decoration: none; }
 
-.table-responsive { width: 100%; overflow-x: auto; }
+.table-responsive { width: 100%; overflow-x: auto; max-height: 400px; overflow-y: auto; }
 .recent-table { width: 100%; border-collapse: collapse; }
 .recent-table th { text-align: left; font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
 .recent-table td { padding: 16px; border-bottom: 1px solid #f9fafb; vertical-align: middle; }

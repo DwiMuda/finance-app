@@ -9,9 +9,10 @@ const pool       = require('../config/database')
 router.get('/summary', ctrl.getSummary)
 router.get('/export',  async (req, res) => {
   try {
+    const user_id = req.user.id
     const { bulan, tahun } = req.query
-    let where  = 'WHERE 1=1'
-    const params = []
+    let where  = 'WHERE user_id = $1'
+    const params = [user_id]
 
     if (bulan) { params.push(bulan); where += ` AND EXTRACT(MONTH FROM tanggal) = $${params.length}` }
     if (tahun) { params.push(tahun); where += ` AND EXTRACT(YEAR  FROM tanggal) = $${params.length}` }
