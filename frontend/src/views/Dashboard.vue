@@ -10,6 +10,7 @@
         <div class="header-actions">
           <div class="select-wrapper">
             <select v-model="selectedMonth" @change="loadData" class="premium-select">
+              <option value="">Semua Bulan</option>
               <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>
             <div class="select-icon">▼</div>
@@ -184,33 +185,73 @@ const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit
 const loadData = async () => {
   loading.value = true
   try {
-    const [tahun, bulan] = selectedMonth.value.split('-')
+    if (!selectedMonth.value) {
+      // Jika "Semua Bulan" dipilih, fetch data dari 12 bulan terakhir
+      const txPromises = monthOptions.value.map(m => getTransactions({ month: m.value }))
+      const sumPromises = monthOptions.value.map(m => getSummary({ month: m.value }))
+      
+      const txResults = await Promise.allSettled(txPromises)
+      const sumResults = await Promise.allSettled(sumPromises)
 
-    const [txRes, sumRes] = await Promise.allSettled([
-      getTransactions({ bulan, tahun }),
-      getSummary({ bulan, tahun })
-    ])
-
-    if (txRes.status === 'fulfilled') {
-      const txData = txRes.value.data
-      recentTransactions.value = txData.data || txData || []
-    } else {
-      console.error('Gagal load transaksi:', txRes.reason)
-      recentTransactions.value = []
-    }
-
-    if (sumRes.status === 'fulfilled') {
-      const sumData = sumRes.value.data
-      if (sumData && sumData.data) {
-        summary.value = {
-          IDR: { ...sumData.data.IDR },
-          JPY: { ...sumData.data.JPY }
+      let allTx = []
+      txResults.forEach(res => {
+        if (res.status === 'fulfilled') {
+          const d = res.value.data?.data || res.value.data
+          if (Array.isArray(d)) allTx = allTx.concat(d)
         }
-      }
-    } else {
-      console.error('Gagal load summary:', sumRes.reason)
-    }
+      })
+      recentTransactions.value = allTx.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
 
+      let aggSum = {
+        IDR: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 },
+        JPY: { total_income: 0, total_expense: 0, saldo: 0, income_count: 0, expense_count: 0 }
+      }
+      
+      sumResults.forEach(res => {
+        if (res.status === 'fulfilled' && res.value.data?.data) {
+          const sumData = res.value.data.data
+          ;['IDR', 'JPY'].forEach(cur => {
+            if (sumData[cur]) {
+              aggSum[cur].total_income += Number(sumData[cur].total_income || 0)
+              aggSum[cur].total_expense += Number(sumData[cur].total_expense || 0)
+              aggSum[cur].saldo += Number(sumData[cur].saldo || 0)
+              aggSum[cur].income_count += Number(sumData[cur].income_count || 0)
+              aggSum[cur].expense_count += Number(sumData[cur].expense_count || 0)
+            }
+          })
+        }
+      })
+      summary.value = aggSum
+
+    } else {
+      // Jika bulan spesifik dipilih
+      const [tahun, bulan] = selectedMonth.value.split('-')
+
+      const [txRes, sumRes] = await Promise.allSettled([
+        getTransactions({ bulan, tahun }),
+        getSummary({ bulan, tahun })
+      ])
+
+      if (txRes.status === 'fulfilled') {
+        const txData = txRes.value.data
+        recentTransactions.value = txData.data || txData || []
+      } else {
+        console.error('Gagal load transaksi:', txRes.reason)
+        recentTransactions.value = []
+      }
+
+      if (sumRes.status === 'fulfilled') {
+        const sumData = sumRes.value.data
+        if (sumData && sumData.data) {
+          summary.value = {
+            IDR: { ...sumData.data.IDR },
+            JPY: { ...sumData.data.JPY }
+          }
+        }
+      } else {
+        console.error('Gagal load summary:', sumRes.reason)
+      }
+    }
   } catch (e) {
     console.error('loadData error:', e)
   } finally {
