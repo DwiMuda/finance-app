@@ -143,13 +143,15 @@ const getExpenseHeight = computed(() => {
 })
 
 const categoryBreakdown = computed(() => {
-  const expenses = transactions.value.filter(t => t.tipe === 'expense' && t.mata_uang === activeCurrency.value)
+  if (!Array.isArray(transactions.value)) return [];
+  const expenses = transactions.value.filter(t => t.tipe === 'expense' && (t.mata_uang || 'IDR') === activeCurrency.value)
   const groups = {}
   let total = 0
   
   expenses.forEach(t => {
-    groups[t.kategori] = (groups[t.kategori] || 0) + Number(t.jumlah)
-    total += Number(t.jumlah)
+    const cat = t.kategori || 'Lainnya';
+    groups[cat] = (groups[cat] || 0) + Number(t.jumlah || 0)
+    total += Number(t.jumlah || 0)
   })
 
   return Object.entries(groups).map(([name, value]) => ({

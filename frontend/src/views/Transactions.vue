@@ -229,10 +229,12 @@ watch(() => form.value.tipe, (v) => {
 })
 
 const filteredTransactions = computed(() => {
+  if (!Array.isArray(transactions.value)) return [];
   return transactions.value.filter(t => {
-    const matchSearch = !search.value || t.deskripsi.toLowerCase().includes(search.value.toLowerCase())
+    const desc = t.deskripsi || '';
+    const matchSearch = !search.value || desc.toLowerCase().includes(search.value.toLowerCase())
     const matchTipe = !filterTipe.value || t.tipe === filterTipe.value
-    const matchMonth = !filterMonth.value || t.tanggal?.startsWith(filterMonth.value)
+    const matchMonth = !filterMonth.value || (t.tanggal && t.tanggal.startsWith(filterMonth.value))
     return matchSearch && matchTipe && matchMonth
   })
 })
@@ -247,7 +249,7 @@ const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day:'2-digit
 const loadTransactions = async () => {
   loading.value = true
   try {
-    const res = await getTransactions()
+    const res = await getTransactions({ all: true })
     transactions.value = res.data.data || res.data
   } catch (e) { console.error('Load error:', e) }
   finally { loading.value = false }

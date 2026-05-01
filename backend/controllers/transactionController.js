@@ -2,6 +2,9 @@ const TransactionModel = require('../models/transactionModel');
 
 // Helper: parse "YYYY-MM" atau query bulan/tahun terpisah
 function parseMonthYear(query) {
+  if (query.all) {
+    return { bulan: null, tahun: null };
+  }
   if (query.month) {
     const [tahun, bulan] = query.month.split('-');
     return { bulan: parseInt(bulan), tahun: parseInt(tahun) };
