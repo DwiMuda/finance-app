@@ -156,8 +156,14 @@ const monthOptions = computed(() => {
 
 const expenseRatio = computed(() => {
   const s = currentSummary.value
-  if (!s.total_income) return 0
-  return Math.min(100, Math.round((s.total_expense / s.total_income) * 100))
+  // Total dana yang tersedia bulan ini = Sisa Saldo akhir + Pengeluaran bulan ini
+  // (karena sisa saldo = dana awal + pemasukan - pengeluaran)
+  const total_available = Number(s.saldo) + Number(s.total_expense)
+  
+  if (total_available <= 0) {
+    return s.total_expense > 0 ? 100 : 0
+  }
+  return Math.min(100, Math.round((Number(s.total_expense) / total_available) * 100))
 })
 
 const getHealthColor = computed(() => {
@@ -344,7 +350,7 @@ onMounted(loadData)
 .circular-progress { position: relative; width: 160px; height: 160px; }
 .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 250px; }
 .circle-bg { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 3.8; }
-.circle { fill: none; stroke-width: 3.5; stroke-linecap: round; animation: progress 1s ease-out forwards; filter: drop-shadow(0 0 6px currentColor); }
+.circle { fill: none; stroke-width: 3.5; stroke-linecap: round; animation: progress 1s ease-out forwards; }
 @keyframes progress { 0% { stroke-dasharray: 0 100; } }
 
 .progress-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
