@@ -80,7 +80,7 @@
           <div class="circular-progress">
             <svg viewBox="0 0 36 36" class="circular-chart">
               <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path class="circle" :stroke-dasharray="expenseRatio + ', 100'" :style="{ stroke: getHealthColor }" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="circle" :style="{ strokeDasharray: expenseRatio + ', 100', stroke: getHealthColor }" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div class="progress-info">
               <span class="pct">{{ expenseRatio }}%</span>
