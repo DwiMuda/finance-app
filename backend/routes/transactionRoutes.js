@@ -77,16 +77,39 @@ router.get('/export',  async (req, res) => {
     ws.addRow([])
 
     const currencies = [...new Set(rows.map(r => r.mata_uang || 'IDR'))]
+
+    let saldoSebelumnya = {}
+    if (bulan && tahun) {
+      const prevParams = [user_id, bulan, tahun]
+      const prevQuery = `
+        SELECT mata_uang,
+               SUM(CASE WHEN tipe = 'income' THEN jumlah ELSE -jumlah END) AS saldo_sebelumnya
+        FROM transactions
+        WHERE user_id = $1
+          AND (
+            (EXTRACT(YEAR FROM tanggal) < $3) OR
+            (EXTRACT(YEAR FROM tanggal) = $3 AND EXTRACT(MONTH FROM tanggal) < $2)
+          )
+        GROUP BY mata_uang
+      `
+      const prevResult = await pool.query(prevQuery, prevParams)
+      prevResult.rows.forEach(r => {
+        saldoSebelumnya[r.mata_uang || 'IDR'] = Number(r.saldo_sebelumnya)
+      })
+    }
+
     currencies.forEach(cur => {
       const curRows = rows.filter(r => (r.mata_uang || 'IDR') === cur)
       const tInc = curRows.filter(r => r.tipe === 'income').reduce((s,r) => s+Number(r.jumlah), 0)
       const tExp = curRows.filter(r => r.tipe === 'expense').reduce((s,r) => s+Number(r.jumlah), 0)
+      const sSeb = saldoSebelumnya[cur] || 0
       
-      const r1 = ws.addRow(['', '', '', '', 'Total Pemasukan', cur, tInc])
-      const r2 = ws.addRow(['', '', '', '', 'Total Pengeluaran', cur, tExp])
-      const r3 = ws.addRow(['', '', '', '', 'Saldo Akhir', cur, tInc - tExp])
+      const r0 = ws.addRow(['', '', '', '', 'Saldo Sebelumnya', cur, sSeb])
+      const r1 = ws.addRow(['', '', '', '', 'Pemasukan Bulan Ini', cur, tInc])
+      const r2 = ws.addRow(['', '', '', '', 'Pengeluaran Bulan Ini', cur, tExp])
+      const r3 = ws.addRow(['', '', '', '', 'Saldo Akhir', cur, sSeb + tInc - tExp])
       
-      const summaryRows = [r1, r2, r3]
+      const summaryRows = [r0, r1, r2, r3]
       summaryRows.forEach(row => {
         [5, 6, 7].forEach(c => {
           row.getCell(c).font = { bold: true }
@@ -94,7 +117,7 @@ router.get('/export',  async (req, res) => {
         })
         row.getCell(7).numFmt = '#,##0'
       })
-      r3.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: (tInc - tExp) >= 0 ? 'FF10B981' : 'FFF43F5E' } }
+      r3.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: (sSeb + tInc - tExp) >= 0 ? 'FF10B981' : 'FFF43F5E' } }
       r3.getCell(7).font = { bold: true, color: { argb: 'FFFFFFFF' } }
       ws.addRow([])
     })

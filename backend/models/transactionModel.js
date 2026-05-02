@@ -66,22 +66,39 @@ const TransactionModel = {
   },
 
   async getSummary({ bulan, tahun, user_id } = {}) {
-    const result = await pool.query(
-      `SELECT
+    let query = ``;
+    let params = [user_id];
+    
+    if (bulan && tahun) {
+      query = `SELECT
+        mata_uang,
+        SUM(CASE WHEN tipe = 'income' AND EXTRACT(MONTH FROM tanggal) = $2 AND EXTRACT(YEAR FROM tanggal) = $3 THEN jumlah ELSE 0 END) AS total_income,
+        SUM(CASE WHEN tipe = 'expense' AND EXTRACT(MONTH FROM tanggal) = $2 AND EXTRACT(YEAR FROM tanggal) = $3 THEN jumlah ELSE 0 END) AS total_expense,
+        SUM(CASE WHEN tipe = 'income'  THEN jumlah WHEN tipe = 'expense' THEN -jumlah ELSE 0 END) AS saldo,
+        COUNT(CASE WHEN tipe = 'income' AND EXTRACT(MONTH FROM tanggal) = $2 AND EXTRACT(YEAR FROM tanggal) = $3 THEN 1 END) AS income_count,
+        COUNT(CASE WHEN tipe = 'expense' AND EXTRACT(MONTH FROM tanggal) = $2 AND EXTRACT(YEAR FROM tanggal) = $3 THEN 1 END) AS expense_count
+       FROM transactions
+       WHERE user_id = $1
+         AND (
+           (EXTRACT(YEAR FROM tanggal) < $3) OR
+           (EXTRACT(YEAR FROM tanggal) = $3 AND EXTRACT(MONTH FROM tanggal) <= $2)
+         )
+       GROUP BY mata_uang`;
+       params.push(bulan, tahun);
+    } else {
+      query = `SELECT
         mata_uang,
         SUM(CASE WHEN tipe = 'income'  THEN jumlah ELSE 0 END) AS total_income,
         SUM(CASE WHEN tipe = 'expense' THEN jumlah ELSE 0 END) AS total_expense,
-        SUM(CASE WHEN tipe = 'income'  THEN jumlah
-                 WHEN tipe = 'expense' THEN -jumlah ELSE 0 END) AS saldo,
+        SUM(CASE WHEN tipe = 'income'  THEN jumlah WHEN tipe = 'expense' THEN -jumlah ELSE 0 END) AS saldo,
         COUNT(CASE WHEN tipe = 'income'  THEN 1 END) AS income_count,
         COUNT(CASE WHEN tipe = 'expense' THEN 1 END) AS expense_count
        FROM transactions
        WHERE user_id = $1
-         AND EXTRACT(MONTH FROM tanggal) = $2
-         AND EXTRACT(YEAR  FROM tanggal) = $3
-       GROUP BY mata_uang`,
-      [user_id, bulan, tahun]
-    );
+       GROUP BY mata_uang`;
+    }
+
+    const result = await pool.query(query, params);
     return result.rows;
   }
 };
