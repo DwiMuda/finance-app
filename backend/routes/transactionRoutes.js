@@ -22,21 +22,29 @@ router.get('/export',  async (req, res) => {
     )
     const rows = result.rows
 
-    const totalIncome  = rows.filter(r => r.tipe==='income') .reduce((s,r) => s+Number(r.jumlah), 0)
-    const totalExpense = rows.filter(r => r.tipe==='expense').reduce((s,r) => s+Number(r.jumlah), 0)
-
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('Laporan Keuangan')
 
     ws.columns = [
-      { header: 'No',        key: 'no',        width: 5  },
-      { header: 'Tanggal',   key: 'tanggal',   width: 16 },
-      { header: 'Kategori',  key: 'kategori',  width: 18 },
-      { header: 'Deskripsi', key: 'deskripsi', width: 30 },
-      { header: 'Tipe',      key: 'tipe',      width: 14 },
-      { header: 'Jumlah',    key: 'jumlah',    width: 18 },
+      { header: 'No',        key: 'no',        width: 6  },
+      { header: 'Tanggal',   key: 'tanggal',   width: 18 },
+      { header: 'Kategori',  key: 'kategori',  width: 22 },
+      { header: 'Deskripsi', key: 'deskripsi', width: 35 },
+      { header: 'Tipe',      key: 'tipe',      width: 16 },
+      { header: 'Mata Uang', key: 'mata_uang', width: 12 },
+      { header: 'Jumlah',    key: 'jumlah',    width: 20 },
     ]
-    ws.getRow(1).font = { bold: true }
+
+    // Style the header row
+    const headerRow = ws.getRow(1)
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' }
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } }
+      cell.border = {
+        top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+      }
+    })
 
     rows.forEach((r, i) => ws.addRow({
       no:        i + 1,
@@ -44,13 +52,52 @@ router.get('/export',  async (req, res) => {
       kategori:  r.kategori,
       deskripsi: r.deskripsi,
       tipe:      r.tipe === 'income' ? 'Pemasukan' : 'Pengeluaran',
+      mata_uang: r.mata_uang || 'IDR',
       jumlah:    Number(r.jumlah)
     }))
 
-    ws.addRow({})
-    ws.addRow({ deskripsi: 'Total Pemasukan',  jumlah: totalIncome  })
-    ws.addRow({ deskripsi: 'Total Pengeluaran', jumlah: totalExpense })
-    ws.addRow({ deskripsi: 'Saldo Akhir',       jumlah: totalIncome - totalExpense })
+    // Style data rows
+    ws.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          // Hanya tambahkan border untuk kolom 1 sampai 7
+          if (colNumber <= 7) {
+            cell.border = {
+              top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+            }
+          }
+          if (colNumber === 1 || colNumber === 5 || colNumber === 6) {
+            cell.alignment = { horizontal: 'center' }
+          }
+        })
+        row.getCell(7).numFmt = '#,##0'
+      }
+    })
+
+    ws.addRow([])
+
+    const currencies = [...new Set(rows.map(r => r.mata_uang || 'IDR'))]
+    currencies.forEach(cur => {
+      const curRows = rows.filter(r => (r.mata_uang || 'IDR') === cur)
+      const tInc = curRows.filter(r => r.tipe === 'income').reduce((s,r) => s+Number(r.jumlah), 0)
+      const tExp = curRows.filter(r => r.tipe === 'expense').reduce((s,r) => s+Number(r.jumlah), 0)
+      
+      const r1 = ws.addRow(['', '', '', '', 'Total Pemasukan', cur, tInc])
+      const r2 = ws.addRow(['', '', '', '', 'Total Pengeluaran', cur, tExp])
+      const r3 = ws.addRow(['', '', '', '', 'Saldo Akhir', cur, tInc - tExp])
+      
+      const summaryRows = [r1, r2, r3]
+      summaryRows.forEach(row => {
+        [5, 6, 7].forEach(c => {
+          row.getCell(c).font = { bold: true }
+          row.getCell(c).border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+        })
+        row.getCell(7).numFmt = '#,##0'
+      })
+      r3.getCell(7).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: (tInc - tExp) >= 0 ? 'FF10B981' : 'FFF43F5E' } }
+      r3.getCell(7).font = { bold: true, color: { argb: 'FFFFFFFF' } }
+      ws.addRow([])
+    })
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     res.setHeader('Content-Disposition', `attachment; filename="laporan.xlsx"`)
