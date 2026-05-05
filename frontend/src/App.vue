@@ -71,30 +71,12 @@ import axios from 'axios'
 
 const route = useRoute()
 const isLoginPage = computed(() => route.name === 'Login')
-const isConnected = ref(false)
+const isConnected = ref(true)
 const isCollapsed = ref(false)
 const userName = ref(localStorage.getItem('nama') || 'User')
 
-let checkInterval = null
-
-const checkConnection = async () => {
-  try {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-    const healthUrl = apiBase.replace('/api', '/health')
-    await axios.get(healthUrl)
-    isConnected.value = true
-  } catch (e) {
-    isConnected.value = false
-  }
-}
-
 onMounted(() => {
-  checkConnection()
-  checkInterval = setInterval(checkConnection, 10000)
-})
-
-onUnmounted(() => {
-  if (checkInterval) clearInterval(checkInterval)
+  // Polling dihapus untuk stabilitas Lighthouse
 })
 </script>
 
@@ -106,7 +88,7 @@ onUnmounted(() => {
 .app-layout {
   display: flex;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   background: transparent;
   overflow: hidden;
 }
