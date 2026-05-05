@@ -261,8 +261,9 @@ onMounted(loadData)
 
 .currency-toggle { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 10px; width: fit-content; margin-bottom: 20px; position: relative; z-index: 2; }
 .currency-toggle button {
-  padding: 4px 12px; border: none; background: transparent; color: rgba(255,255,255,0.6);
+  padding: 12px 16px; border: none; background: transparent; color: rgba(255,255,255,0.6);
   font-size: 12px; font-weight: 800; cursor: pointer; border-radius: 6px; transition: all 0.2s;
+  min-width: 48px; min-height: 48px;
 }
 .currency-toggle button.active { background: white; color: var(--primary-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 

@@ -164,7 +164,7 @@ onUnmounted(() => {
 }
 
 .brand-version {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--primary);
   text-transform: uppercase;
@@ -247,7 +247,7 @@ onUnmounted(() => {
   color: var(--danger);
   border-radius: 99px;
   width: fit-content;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -385,11 +385,12 @@ onUnmounted(() => {
   .nav-item {
     flex-direction: column;
     gap: 4px;
-    padding: 8px;
-    font-size: 10px;
+    padding: 8px 4px;
+    font-size: 12px;
     flex: 1;
     justify-content: center;
     border-radius: 12px;
+    min-height: 48px; /* Pastikan tap target 48px */
   }
   .nav-item.router-link-active {
     background: transparent;

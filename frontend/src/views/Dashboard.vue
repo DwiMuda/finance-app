@@ -295,10 +295,10 @@ onMounted(loadData)
 }
 .premium-select:hover { border-color: var(--primary); }
 .premium-select option { background: var(--bg-main); color: var(--text-main); }
-.select-icon { position: absolute; right: 14px; pointer-events: none; font-size: 10px; color: var(--text-muted); }
+.select-icon { position: absolute; right: 14px; pointer-events: none; font-size: 12px; color: var(--text-muted); }
 
 .btn-logout-circle {
-  width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border);
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border);
   background: var(--bg-card); color: var(--text-muted); display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s;
 }
@@ -355,7 +355,7 @@ onMounted(loadData)
 
 .progress-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
 .progress-info .pct { font-size: 32px; font-family: 'Satoshi', sans-serif; font-weight: 900; color: var(--text-main); line-height: 1; }
-.progress-info .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; }
+.progress-info .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .link-more { font-size: 13px; font-weight: 600; color: var(--primary); text-decoration: none; transition: color 0.2s; }
@@ -370,7 +370,7 @@ onMounted(loadData)
 .tx-info { flex: 1; }
 .tx-desc { font-weight: 600; color: var(--text-main); font-size: 15px; margin-bottom: 4px; }
 .tx-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-.cat-pill { background: rgba(255, 255, 255, 0.05); padding: 2px 8px; border-radius: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.cat-pill { background: rgba(255, 255, 255, 0.05); padding: 2px 8px; border-radius: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
 .tx-amount { font-family: 'Satoshi', sans-serif; font-weight: 800; font-size: 16px; }
 .tx-amount.income { color: var(--success); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
 .tx-amount.expense { color: var(--text-main); }

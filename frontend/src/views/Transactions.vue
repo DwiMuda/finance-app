@@ -35,12 +35,12 @@
         <input v-model="search" placeholder="Cari deskripsi transaksi..." aria-label="Cari deskripsi transaksi" />
       </div>
       <div class="filter-actions">
-        <select v-model="filterTipe" class="premium-select-sm">
+        <select v-model="filterTipe" class="premium-select-sm" aria-label="Filter berdasarkan tipe">
           <option value="">Semua Tipe</option>
           <option value="income">Pemasukan</option>
           <option value="expense">Pengeluaran</option>
         </select>
-        <select v-model="filterMonth" class="premium-select-sm">
+        <select v-model="filterMonth" class="premium-select-sm" aria-label="Filter berdasarkan bulan">
           <option value="">Semua Bulan</option>
           <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
         </select>
@@ -119,12 +119,12 @@
                   </div>
                 </div>
                 <div class="f-group">
-                  <label>Tanggal</label>
-                  <input type="date" v-model="form.tanggal" required />
+                  <label for="tx-tanggal">Tanggal</label>
+                  <input id="tx-tanggal" type="date" v-model="form.tanggal" required />
                 </div>
                 <div class="f-group full">
-                  <label>Kategori</label>
-                  <select v-model="form.kategori" required>
+                  <label for="tx-kategori">Kategori</label>
+                  <select id="tx-kategori" v-model="form.kategori" required>
                     <option value="" disabled>Pilih Kategori...</option>
                     <template v-if="form.tipe === 'income'">
                       <option v-for="k in kategoriIncome" :key="k" :value="k">{{ k }}</option>
@@ -135,19 +135,19 @@
                   </select>
                 </div>
                 <div class="f-group full">
-                  <label>Deskripsi</label>
-                  <input v-model="form.deskripsi" placeholder="Masukkan keterangan..." required />
+                  <label for="tx-deskripsi">Deskripsi</label>
+                  <input id="tx-deskripsi" v-model="form.deskripsi" placeholder="Masukkan keterangan..." required />
                 </div>
                 <div class="f-group">
-                  <label>Mata Uang</label>
-                  <select v-model="form.mata_uang" required>
+                  <label for="tx-mata-uang">Mata Uang</label>
+                  <select id="tx-mata-uang" v-model="form.mata_uang" required>
                     <option value="IDR">Rupiah (IDR)</option>
                     <option value="JPY">Yen (JPY)</option>
                   </select>
                 </div>
                 <div class="f-group">
-                  <label>Jumlah</label>
-                  <input type="number" v-model="form.jumlah" placeholder="0" min="1" required />
+                  <label for="tx-jumlah">Jumlah</label>
+                  <input id="tx-jumlah" type="number" v-model="form.jumlah" placeholder="0" min="1" required />
                 </div>
               </div>
               <div class="panel-footer">
@@ -403,7 +403,7 @@ onMounted(loadTransactions)
 .tx-icon.expense { background: var(--danger-bg); color: var(--danger); }
 .tx-desc { font-weight: 600; color: var(--text-main); font-size: 16px; margin-bottom: 4px; }
 .tx-meta { display: flex; align-items: center; gap: 8px; }
-.cat-pill { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.cat-pill { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .tx-right { display: flex; align-items: center; gap: 24px; }
 .tx-amount { font-family: 'Satoshi', sans-serif; font-size: 18px; font-weight: 800; text-align: right; }
@@ -412,7 +412,7 @@ onMounted(loadTransactions)
 
 .tx-actions { display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s; }
 .tx-card:hover .tx-actions { opacity: 1; }
-.btn-icon { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-icon { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
 .btn-icon:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 .btn-icon.danger:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
@@ -481,7 +481,7 @@ onMounted(loadTransactions)
   .tx-actions { opacity: 1; } /* Always show on mobile */
   .tx-right { flex-direction: column; align-items: flex-end; gap: 8px; }
   .tx-amount { font-size: 16px; }
-  .btn-icon { width: 32px; height: 32px; }
+  .btn-icon { width: 44px; height: 44px; }
   
   .slide-panel { max-width: 100%; border-radius: 24px 24px 0 0; height: 90vh; margin-top: 10vh; border-left: none; border-top: 1px solid var(--border); }
   .modal-overlay { justify-content: center; align-items: flex-end; }
