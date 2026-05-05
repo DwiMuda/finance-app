@@ -1,0 +1,16 @@
+{
+  "name": "FinTrack Premium",
+  "short_name": "FinTrack",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "description": "Dashboard keuangan pribadi dan bisnis terbaik.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

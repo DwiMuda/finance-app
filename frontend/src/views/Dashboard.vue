@@ -253,7 +253,7 @@ const loadData = async () => {
       }
     }
   } catch (e) {
-    console.error('loadData error:', e)
+    // error handled silently
   } finally {
     loading.value = false
   }

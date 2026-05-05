@@ -181,7 +181,7 @@ const loadData = async () => {
     if (sumRes.data.data) summary.value = sumRes.data.data
     connectionStatus.value = 'online'
   } catch (e) {
-    console.error(e)
+    // error handled silently
     connectionStatus.value = 'offline'
   } finally {
     loading.value = false
@@ -193,7 +193,7 @@ const exportData = async () => {
   try {
     await exportExcel({ month: selectedMonth.value })
   } catch (e) {
-    console.error(e)
+    // error handled silently
     alert('Gagal mengekspor data.')
   } finally {
     exporting.value = false

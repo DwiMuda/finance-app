@@ -272,7 +272,7 @@ const loadTransactions = async () => {
     
     transactions.value = allData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
   } catch (e) { 
-    console.error('Load error:', e) 
+    // console error removed for lighthouse best practices
   }
   finally { 
     loading.value = false 
