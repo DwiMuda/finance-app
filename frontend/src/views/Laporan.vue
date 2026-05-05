@@ -13,13 +13,13 @@
     <!-- Filters & Export -->
     <div class="filters-card glass-card">
       <div class="filter-group">
-        <select v-model="selectedMonth" @change="loadData" class="premium-select">
+        <select v-model="selectedMonth" @change="loadData" class="premium-select" aria-label="Pilih bulan untuk laporan">
           <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
         </select>
       </div>
       <div class="export-actions">
-        <button @click="exportData" class="btn-export" :disabled="exporting">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <button @click="exportData" class="btn-export" :disabled="exporting" aria-label="Ekspor data ke Excel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           {{ exporting ? 'Mengekspor...' : 'Unduh Excel' }}
         </button>
       </div>
@@ -39,8 +39,8 @@
       </div>
       <div class="report-card primary-gradient glass-card">
         <div class="currency-toggle">
-          <button :class="{ active: activeCurrency === 'IDR' }" @click="activeCurrency = 'IDR'">IDR</button>
-          <button :class="{ active: activeCurrency === 'JPY' }" @click="activeCurrency = 'JPY'">JPY</button>
+          <button :class="{ active: activeCurrency === 'IDR' }" @click="activeCurrency = 'IDR'" aria-pressed="activeCurrency === 'IDR'" aria-label="Gunakan Rupiah">IDR</button>
+          <button :class="{ active: activeCurrency === 'JPY' }" @click="activeCurrency = 'JPY'" aria-pressed="activeCurrency === 'JPY'" aria-label="Gunakan Yen">JPY</button>
         </div>
         <div class="card-label-light">Total Saldo Bersih</div>
         <div class="card-value-light big animate-count">{{ formatCurrency(currentSummary.saldo, activeCurrency) }}</div>

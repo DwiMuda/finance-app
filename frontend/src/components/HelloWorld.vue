@@ -10,15 +10,15 @@ const count = ref(0)
 <template>
   <section id="center">
     <div class="hero">
-      <img :src="heroImg" class="base" width="170" height="179" alt="" />
-      <img :src="vueLogo" class="framework" alt="Vue logo" />
-      <img :src="viteLogo" class="vite" alt="Vite logo" />
+      <img :src="heroImg" class="base" width="170" height="179" alt="Hero banner" loading="lazy" />
+      <img :src="vueLogo" class="framework" alt="Vue logo" loading="lazy" />
+      <img :src="viteLogo" class="vite" alt="Vite logo" loading="lazy" />
     </div>
     <div>
       <h1>Get started</h1>
       <p>Edit <code>src/App.vue</code> and save to test <code>HMR</code></p>
     </div>
-    <button class="counter" @click="count++">Count is {{ count }}</button>
+    <button class="counter" @click="count++" aria-label="Increment counter">Count is {{ count }}</button>
   </section>
 
   <div class="ticks"></div>
@@ -32,15 +32,15 @@ const count = ref(0)
       <p>Your questions, answered</p>
       <ul>
         <li>
-          <a href="https://vite.dev/" target="_blank">
-            <img class="logo" :src="viteLogo" alt="" />
+          <a href="https://vite.dev/" target="_blank" aria-label="Explore Vite Documentation">
+            <img class="logo" :src="viteLogo" alt="Vite logo" loading="lazy" />
             Explore Vite
           </a>
         </li>
         <li>
-          <a href="https://vuejs.org/" target="_blank">
-            <img class="button-icon" :src="vueLogo" alt="" />
-            Learn more
+          <a href="https://vuejs.org/" target="_blank" aria-label="Learn more about Vue.js">
+            <img class="button-icon" :src="vueLogo" alt="Vue logo" loading="lazy" />
+            Learn more about Vue
           </a>
         </li>
       </ul>
@@ -53,7 +53,7 @@ const count = ref(0)
       <p>Join the Vite community</p>
       <ul>
         <li>
-          <a href="https://github.com/vitejs/vite" target="_blank">
+          <a href="https://github.com/vitejs/vite" target="_blank" aria-label="Kunjungi GitHub Vite">
             <svg class="button-icon" role="presentation" aria-hidden="true">
               <use href="/icons.svg#github-icon"></use>
             </svg>
@@ -61,7 +61,7 @@ const count = ref(0)
           </a>
         </li>
         <li>
-          <a href="https://chat.vite.dev/" target="_blank">
+          <a href="https://chat.vite.dev/" target="_blank" aria-label="Bergabung dengan Discord Vite">
             <svg class="button-icon" role="presentation" aria-hidden="true">
               <use href="/icons.svg#discord-icon"></use>
             </svg>
@@ -69,7 +69,7 @@ const count = ref(0)
           </a>
         </li>
         <li>
-          <a href="https://x.com/vite_js" target="_blank">
+          <a href="https://x.com/vite_js" target="_blank" aria-label="Ikuti Vite di X.com">
             <svg class="button-icon" role="presentation" aria-hidden="true">
               <use href="/icons.svg#x-icon"></use>
             </svg>
@@ -77,7 +77,7 @@ const count = ref(0)
           </a>
         </li>
         <li>
-          <a href="https://bsky.app/profile/vite.dev" target="_blank">
+          <a href="https://bsky.app/profile/vite.dev" target="_blank" aria-label="Ikuti Vite di Bluesky">
             <svg class="button-icon" role="presentation" aria-hidden="true">
               <use href="/icons.svg#bluesky-icon"></use>
             </svg>

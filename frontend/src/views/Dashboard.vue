@@ -9,14 +9,14 @@
         </div>
         <div class="header-actions">
           <div class="select-wrapper">
-            <select v-model="selectedMonth" @change="loadData" class="premium-select">
+            <select v-model="selectedMonth" @change="loadData" class="premium-select" aria-label="Pilih bulan">
               <option value="">Semua Bulan</option>
               <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>
             <div class="select-icon">▼</div>
           </div>
-          <button class="btn-logout-circle" @click="logout" title="Keluar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <button class="btn-logout-circle" @click="logout" title="Keluar" aria-label="Keluar dari akun">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </div>
       </div>
@@ -25,12 +25,12 @@
     <!-- Currency Tabs -->
     <div class="currency-nav">
       <div class="tabs-container">
-        <button :class="{ active: activeCurrency === 'IDR' }" @click="activeCurrency = 'IDR'">
-          <span class="tab-flag">🇮🇩</span>
+        <button :class="{ active: activeCurrency === 'IDR' }" @click="activeCurrency = 'IDR'" aria-pressed="activeCurrency === 'IDR'" aria-label="Gunakan Rupiah">
+          <span class="tab-flag" aria-hidden="true">🇮🇩</span>
           <span class="tab-label">IDR (Rupiah)</span>
         </button>
-        <button :class="{ active: activeCurrency === 'JPY' }" @click="activeCurrency = 'JPY'">
-          <span class="tab-flag">🇯🇵</span>
+        <button :class="{ active: activeCurrency === 'JPY' }" @click="activeCurrency = 'JPY'" aria-pressed="activeCurrency === 'JPY'" aria-label="Gunakan Yen">
+          <span class="tab-flag" aria-hidden="true">🇯🇵</span>
           <span class="tab-label">JPY (Yen)</span>
         </button>
       </div>
@@ -93,7 +93,7 @@
       <div class="recent-card glass-card">
         <div class="card-header">
           <div class="card-title">Transaksi Terbaru</div>
-          <RouterLink to="/transaksi" class="link-more">Lihat Semua &rarr;</RouterLink>
+          <RouterLink to="/transaksi" class="link-more" aria-label="Lihat semua transaksi">Lihat Semua &rarr;</RouterLink>
         </div>
         
         <div v-if="loading" class="loading-state">

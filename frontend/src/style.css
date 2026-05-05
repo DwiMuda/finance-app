@@ -157,3 +157,21 @@ h1, h2, h3, h4, h5, h6 {
   animation: shimmer 2s infinite linear;
   border-radius: var(--radius-sm);
 }
+
+/* Accessibility Focus States */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Base Link Reset */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+a:hover {
+  text-decoration: underline;
+  color: var(--primary-light);
+}

@@ -7,8 +7,8 @@
           <h1>Riwayat Transaksi</h1>
           <p>Catat dan pantau setiap pengeluaran & pemasukan</p>
         </div>
-        <button class="btn-add-premium" @click="openModal()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <button class="btn-add-premium" @click="openModal()" aria-label="Tambah transaksi baru">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Transaksi Baru</span>
         </button>
       </div>
@@ -17,12 +17,12 @@
     <!-- Currency Tabs -->
     <div class="currency-nav">
       <div class="tabs-container">
-        <button :class="{ active: filterCurrency === 'IDR' }" @click="filterCurrency = 'IDR'">
-          <span class="tab-flag">🇮🇩</span>
+        <button :class="{ active: filterCurrency === 'IDR' }" @click="filterCurrency = 'IDR'" aria-pressed="filterCurrency === 'IDR'" aria-label="Filter dengan Rupiah">
+          <span class="tab-flag" aria-hidden="true">🇮🇩</span>
           <span class="tab-label">IDR (Rupiah)</span>
         </button>
-        <button :class="{ active: filterCurrency === 'JPY' }" @click="filterCurrency = 'JPY'">
-          <span class="tab-flag">🇯🇵</span>
+        <button :class="{ active: filterCurrency === 'JPY' }" @click="filterCurrency = 'JPY'" aria-pressed="filterCurrency === 'JPY'" aria-label="Filter dengan Yen">
+          <span class="tab-flag" aria-hidden="true">🇯🇵</span>
           <span class="tab-label">JPY (Yen)</span>
         </button>
       </div>
@@ -31,8 +31,8 @@
     <!-- Filters Bar -->
     <div class="filters-card glass-card">
       <div class="search-wrapper">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input v-model="search" placeholder="Cari deskripsi transaksi..." />
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input v-model="search" placeholder="Cari deskripsi transaksi..." aria-label="Cari deskripsi transaksi" />
       </div>
       <div class="filter-actions">
         <select v-model="filterTipe" class="premium-select-sm">
@@ -44,8 +44,8 @@
           <option value="">Semua Bulan</option>
           <option v-for="m in monthOptions" :key="m.value" :value="m.value">{{ m.label }}</option>
         </select>
-        <button class="btn-reset" @click="resetFilters" title="Reset Filter">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <button class="btn-reset" @click="resetFilters" title="Reset Filter" aria-label="Reset semua filter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
       </div>
     </div>
@@ -102,11 +102,11 @@
 
     <!-- Slide-over Modal Form -->
     <Transition name="slide-over">
-      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div v-if="showModal" class="modal-overlay" @click.self="closeModal" role="dialog" aria-modal="true" :aria-label="editingId ? 'Update Transaksi' : 'Catat Transaksi'">
         <div class="slide-panel glass-card">
           <div class="panel-header">
             <h2>{{ editingId ? 'Update Transaksi' : 'Catat Transaksi' }}</h2>
-            <button @click="closeModal" class="close-x"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button @click="closeModal" class="close-x" aria-label="Tutup modal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div class="panel-body">
             <form @submit.prevent="saveTransaction" class="premium-form">
@@ -164,10 +164,10 @@
 
     <!-- Delete Confirm -->
     <Transition name="fade">
-      <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
+      <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
         <div class="confirm-box glass-card">
-          <div class="warn-icon">⚠️</div>
-          <h3>Hapus Transaksi?</h3>
+          <div class="warn-icon" aria-hidden="true">⚠️</div>
+          <h3 id="delete-dialog-title">Hapus Transaksi?</h3>
           <p>Tindakan ini permanen dan akan mempengaruhi saldo Anda.</p>
           <div class="confirm-actions">
             <button @click="showDeleteModal = false" class="btn-cancel">Batal</button>
